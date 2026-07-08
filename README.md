@@ -23,7 +23,7 @@ Baue auf der Datei index.html auf.
   </head>
   <body>
   	<div class="container d-flex flex-column align-items-center justify-content-center min-vh-100">
-		<h1>Hallo Stadtgymi Porz!</h1>
+		<b>Hallo Stadtgymi Porz!</b>
    	</div>
   <script type="module"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
