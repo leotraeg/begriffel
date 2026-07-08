@@ -1,17 +1,180 @@
 <!doctype html>
-<html lang="en">
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Begriffel Demo</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+  <style>
+    .letter-input {
+      width: 60px;
+      height: 60px;
+      font-size: 2rem;
+      text-align: center;
+      text-transform: uppercase;
+      font-weight: bold;
+      margin: 4px;
+      border: 2px solid #ccc;
+      border-radius: 4px;
+      transition: background-color 0.3s, color 0.3s;
+    }
+    .letter-input:disabled {
+      background-color: #f8f9fa;
+      color: #000;
+    }
+    /* Farben für die Auswertung */
+    .correct {
+      background-color: #198754 !important; /* Grün */
+      color: white !important;
+      border-color: #198754 !important;
+    }
+    .present {
+      background-color: #ffc107 !important; /* Gelb */
+      color: white !important;
+      border-color: #ffc107 !important;
+    }
+    .absent {
+      background-color: #6c757d !important; /* Grau */
+      color: white !important;
+      border-color: #6c757d !important;
+    }
+  </style>
+</head>
+<body>
+  <div class="container d-flex flex-column align-items-center justify-content-center min-vh-100">
+    <h3 class="mb-4">Hallo Stadtgymi Porz!</h3>
+    
+    <div id="game-board" class="d-flex flex-column align-items-center"></div>
 
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Begriffel Demo</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
-  </head>
-  <body>
-  	<div class="container d-flex flex-column align-items-center justify-content-center min-vh-100">
-		<h1>Hallo Stadtgymi Porz!</h1>
-   	</div>
-  <script type="module"></script>
+    <button id="enter-btn" class="btn btn-dark mt-4 px-4 py-2 fw-bold">ENTER</button>
+    <div id="message" class="mt-3 fw-bold text-danger"></div>
+  </div>
+
+  <script type="module">
+    const TARGET_WORD = "TAFEL";
+    const ROWS = 6;
+    const COLS = 5;
+    let currentRow = 0;
+
+    const gameBoard = document.getElementById('game-board');
+    const enterBtn = document.getElementById('enter-btn');
+    const messageDiv = document.getElementById('message');
+
+    // 1. Raster generieren
+    for (let r = 0; r < ROWS; r++) {
+      const rowDiv = document.createElement('div');
+      rowDiv.className = 'd-flex';
+      rowDiv.id = `row-${r}`;
+
+      for (let c = 0; c < COLS; c++) {
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.maxLength = 1;
+        input.className = 'letter-input';
+        input.id = `input-${r}-${c}`;
+        
+        // Nur die erste Reihe (Index 0) ist zu Beginn aktiviert
+        if (r !== 0) {
+          input.disabled = true;
+        }
+
+        // UX: Automatisches Weiterspringen zum nächsten Feld bei Eingabe
+        input.addEventListener('input', function() {
+          this.value = this.value.toUpperCase().replace(/[^A-ZÄÖÜ]/g, ''); // Nur Buchstaben zulassen
+          if (this.value && c < COLS - 1) {
+            document.getElementById(`input-${r}-${c+1}`).focus();
+          }
+        });
+
+        // UX: Mit Backspace zum vorherigen Feld springen
+        input.addEventListener('keydown', function(e) {
+          if (e.key === 'Backspace' && !this.value && c > 0) {
+            const prev = document.getElementById(`input-${r}-${c-1}`);
+            prev.focus();
+            prev.value = '';
+          } else if (e.key === 'Enter') {
+            enterBtn.click();
+          }
+        });
+
+        rowDiv.appendChild(input);
+      }
+      gameBoard.appendChild(rowDiv);
+    }
+
+    // Setze Fokus auf das erste Feld
+    document.getElementById('input-0-0').focus();
+
+    // 2. Spiellogik beim Klick auf ENTER
+    enterBtn.addEventListener('click', () => {
+      if (currentRow >= ROWS) return; // Spiel ist schon vorbei
+
+      // Aktuelle Eingaben sammeln
+      let guess = "";
+      const inputs = [];
+      for (let c = 0; c < COLS; c++) {
+        const input = document.getElementById(`input-${currentRow}-${c}`);
+        guess += input.value.toUpperCase();
+        inputs.push(input);
+      }
+
+      // Prüfen, ob das Wort komplett ist
+      if (guess.length < COLS) {
+        messageDiv.innerText = "Bitte fülle alle 5 Felder aus!";
+        return;
+      }
+      messageDiv.innerText = ""; // Fehler-Nachricht löschen
+
+      // Auswertungslogik (Grün, Gelb, Grau)
+      let targetLetters = TARGET_WORD.split('');
+      const results = new Array(COLS).fill('absent'); // Standardmäßig grau
+
+      // Schritt 1: Richtige Positionen (Grün) finden
+      for (let i = 0; i < COLS; i++) {
+        if (guess[i] === targetLetters[i]) {
+          results[i] = 'correct';
+          targetLetters[i] = null; // Buchstaben aus dem Pool entfernen, um doppelte Gelbe zu vermeiden
+        }
+      }
+
+      // Schritt 2: Falsche Positionen (Gelb) finden
+      for (let i = 0; i < COLS; i++) {
+        if (results[i] !== 'correct' && targetLetters.includes(guess[i])) {
+          results[i] = 'present';
+          targetLetters[targetLetters.indexOf(guess[i])] = null; // Buchstaben aus Pool entfernen
+        }
+      }
+
+      // Schritt 3: Felder einfärben und deaktivieren
+      for (let i = 0; i < COLS; i++) {
+        inputs[i].classList.add(results[i]);
+        inputs[i].disabled = true;
+      }
+
+      // Schritt 4: Spielstatus prüfen (Gewonnen oder nächste Reihe)
+      if (guess === TARGET_WORD) {
+        messageDiv.className = "mt-3 fw-bold text-success";
+        messageDiv.innerText = "Glückwunsch! Du hast das Wort erraten.";
+        enterBtn.disabled = true;
+        return;
+      }
+
+      currentRow++;
+
+      if (currentRow < ROWS) {
+        // Nächste Reihe aktivieren
+        for (let c = 0; c < COLS; c++) {
+          document.getElementById(`input-${currentRow}-${c}`).disabled = false;
+        }
+        document.getElementById(`input-${currentRow}-0`).focus();
+      } else {
+        // Verloren
+        messageDiv.className = "mt-3 fw-bold text-danger";
+        messageDiv.innerText = `Schade! Das gesuchte Wort war: ${TARGET_WORD}`;
+        enterBtn.disabled = true;
+      }
+    });
+  </script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
-  </body>
+</body>
 </html>
