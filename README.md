@@ -1,8 +1,8 @@
 # Begriffel LLM-Prompt
 
-Erstelle ein 5 x 6 Raster mit <input type="text"> Feldern, welche nur einen Buchstaben erlauben. 
+Erstelle ein 5 x 6 Raster mit < input type="text" > Feldern, welche nur einen Buchstaben erlauben. 
 
-Bis auf die oberste Reihe, sind alle <input type="text"> Felder disabled.
+Bis auf die oberste Reihe, sind alle < input type="text" > Felder disabled.
 
 Füge einen Button „ENTER“ unter das Raster hinzu.
 
@@ -12,22 +12,22 @@ Nach Eingabe eines Wortes (über Enter) werden die Felder disabled und zeigen ü
 
 Baue auf der Datei index.html auf.
 
-<!doctype html>
-<html lang="en">
+< !doctype html>
+< html lang="en">
+  < head>
+    < meta charset="utf-8">
+    < meta name="viewport" content="width=device-width, initial-scale=1">
+    < title>Begriffel Demo</title >
+    < link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+  < /head>
+  < body>
+  	< div class="container d-flex flex-column align-items-center justify-content-center min-vh-100">
+		< h3 > Hallo Stadtgymi Porz! < /h3>
+   	< /div>
+  < script type="module"></script>
+  < script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+  < /body>
+< /html>
 
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Begriffel Demo</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
-  </head>
-  <body>
-  	<div class="container d-flex flex-column align-items-center justify-content-center min-vh-100">
-		<b>Hallo Stadtgymi Porz!</b>
-   	</div>
-  <script type="module"></script>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
-  </body>
-</html>
 
 Das Rate-Wort ist TAFEL.
