@@ -1,5 +1,4 @@
-<img width="636" height="88" alt="image" src="https://github.com/user-attachments/assets/1d266fc9-1d6d-4bdd-8461-afd26146f027" /># begriffel
-LLM-Prompt:
+# Begriffel LLM-Prompt
 
 Erstelle ein 5 x 6 Raster mit <input type="text"> Feldern, welche nur einen Buchstaben erlauben. 
 
