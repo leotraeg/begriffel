@@ -1,17 +1,156 @@
 <!doctype html>
-<html lang="en">
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Begriffel Demo</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+  <style>
+    /* Styling für die quadratischen Buchstaben-Felder */
+    .letter-box {
+      width: 3.5rem;
+      height: 3.5rem;
+      font-size: 2rem;
+      text-align: center;
+      text-transform: uppercase;
+      font-weight: bold;
+    }
+    
+    /* Entfernt den Standard-Fokus-Rand, wenn das Feld schon farbig markiert ist */
+    .letter-box:disabled {
+      cursor: not-allowed;
+      opacity: 0.9;
+    }
+  </style>
+</head>
+<body>
+  <div class="container d-flex flex-column align-items-center justify-content-center min-vh-100">
+    <h3 class="mb-4">Hallo Stadtgymi Porz!</h3>
+    
+    <div id="game-board" class="d-flex flex-column gap-2 mb-4"></div>
+    
+    <button id="enter-btn" class="btn btn-primary btn-lg px-5">ENTER</button>
+  </div>
 
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Begriffel Demo</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
-  </head>
-  <body>
-  	<div class="container d-flex flex-column align-items-center justify-content-center min-vh-100">
-		<h1>Hallo Stadtgymi Porz!</h1>
-   	</div>
-  <script type="module"></script>
+  <script type="module">
+    const TARGET_WORD = "TAFEL";
+    const ROWS = 6;
+    const COLS = 5;
+    let currentRow = 0;
+
+    const board = document.getElementById("game-board");
+    
+    // 1. Raster aufbauen
+    for (let r = 0; r < ROWS; r++) {
+      const rowDiv = document.createElement("div");
+      rowDiv.className = "d-flex gap-2";
+      rowDiv.id = `row-${r}`;
+      
+      for (let c = 0; c < COLS; c++) {
+        const input = document.createElement("input");
+        input.type = "text";
+        input.maxLength = 1;
+        input.className = "form-control letter-box";
+        input.id = `input-${r}-${c}`;
+        
+        // Alle Reihen außer der ersten deaktivieren
+        if (r !== 0) {
+          input.disabled = true;
+        }
+        
+        // Komfort-Funktion: Springt automatisch ins nächste Feld beim Tippen
+        input.addEventListener("input", (e) => {
+          if (e.target.value.length === 1 && c < COLS - 1) {
+            document.getElementById(`input-${r}-${c+1}`).focus();
+          }
+        });
+        
+        rowDiv.appendChild(input);
+      }
+      board.appendChild(rowDiv);
+    }
+
+    const enterBtn = document.getElementById("enter-btn");
+    
+    // 2. Logik beim Klicken auf "ENTER"
+    enterBtn.addEventListener("click", checkWord);
+
+    // Auch die "Enter"-Taste auf der Tastatur erlauben
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        checkWord();
+      }
+    });
+
+    function checkWord() {
+      if (currentRow >= ROWS) return; // Spiel ist schon vorbei
+      
+      const currentInputs = [];
+      let guess = "";
+      
+      // Werte aus der aktuellen Reihe auslesen
+      for (let c = 0; c < COLS; c++) {
+        const input = document.getElementById(`input-${currentRow}-${c}`);
+        currentInputs.push(input);
+        guess += (input.value || "").toUpperCase();
+      }
+      
+      // Prüfen ob 5 Buchstaben eingegeben wurden
+      if (guess.length < COLS) {
+        alert("Bitte fülle alle 5 Felder aus.");
+        return;
+      }
+      
+      // Arrays für die exakte Auswertung (verhindert z.B. zu viele gelbe Felder bei doppelten Buchstaben)
+      let targetChars = TARGET_WORD.split('');
+      let guessChars = guess.split('');
+      
+      // Erster Durchlauf: "Grün" (richtiger Buchstabe am richtigen Ort) prüfen
+      for (let i = 0; i < COLS; i++) {
+        if (guessChars[i] === targetChars[i]) {
+          currentInputs[i].classList.add("bg-success", "text-white", "border-success");
+          targetChars[i] = null; // Markiert den Buchstaben als "verwendet"
+          guessChars[i] = null; 
+        }
+      }
+      
+      // Zweiter Durchlauf: "Gelb" (richtiger Buchstabe, falscher Ort) und "Grau" (falscher Buchstabe)
+      for (let i = 0; i < COLS; i++) {
+        if (guessChars[i] !== null) {
+          let targetIndex = targetChars.indexOf(guessChars[i]);
+          if (targetIndex !== -1) {
+            currentInputs[i].classList.add("bg-warning", "text-dark", "border-warning");
+            targetChars[targetIndex] = null;
+          } else {
+            currentInputs[i].classList.add("bg-secondary", "text-white", "border-secondary");
+          }
+        }
+        // Feld nach Überprüfung sperren
+        currentInputs[i].disabled = true;
+      }
+      
+      // Überprüfen, ob das Spiel gewonnen wurde
+      if (guess === TARGET_WORD) {
+        setTimeout(() => alert("Glückwunsch! Du hast das Wort erraten!"), 200);
+        return;
+      }
+      
+      currentRow++;
+      
+      // Nächste Reihe aktivieren, falls noch Versuche übrig sind
+      if (currentRow < ROWS) {
+        for (let c = 0; c < COLS; c++) {
+          const input = document.getElementById(`input-${currentRow}-${c}`);
+          input.disabled = false;
+        }
+        // Fokus auf das erste Feld der neuen Reihe setzen
+        document.getElementById(`input-${currentRow}-0`).focus();
+      } else {
+        // Keine Versuche mehr
+        setTimeout(() => alert(`Schade! Das gesuchte Wort war: ${TARGET_WORD}`), 200);
+      }
+    }
+  </script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
-  </body>
+</body>
 </html>
